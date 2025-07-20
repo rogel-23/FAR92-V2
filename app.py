@@ -787,12 +787,9 @@ if action == "📎 Déposer un rapport d'observation":
 
     if submit and nom_sel and uploaded_file:
         # 1. Sauvegarder le fichier
-<<<<<<< HEAD
+
         temp_path = "/tmp/temp_upload.pdf"
-        with open(temp_path, "wb") as f:
-=======
         with open("temp_upload.pdf", "wb") as f:
->>>>>>> 6ec2dac037bedef48ebe64cd2320ea0ef5fb5a6e
             f.write(uploaded_file.getbuffer())
 
         # 2. Lancer l’upload (le fichier existe maintenant)
@@ -1180,8 +1177,5 @@ elif action == "👤 Fiche arbitre":
 st.markdown("---")
 st.subheader("📋 Liste des arbitres")
 for a in st.session_state["far_arbitres"]:
-<<<<<<< HEAD
     st.markdown(f"- **{a['Prénom']} {a['Nom']}** | {a['Catégorie']} | Âge : {a.get('Âge', 'N/A')}")
-=======
-    st.markdown(f"- **{a['Prénom']} {a['Nom']}** | {a['Catégorie']} | Âge : {a.get('Âge', 'N/A')}")
->>>>>>> 6ec2dac037bedef48ebe64cd2320ea0ef5fb5a6e
+
