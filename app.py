@@ -793,7 +793,7 @@ if action == "📎 Déposer un rapport d'observation":
             f.write(uploaded_file.getbuffer())
 
         # 2. Lancer l’upload (le fichier existe maintenant)
-        url_partage = upload_to_drive("temp_upload.pdf", uploaded_file.name, parent_folder_id=folder_id)
+        url_partage = upload_to_drive("temp_upload.pdf", uploaded_file.name)
 
         # 3. Stocker l’URL dans l’arbitre concerné
         rapports = json.loads(st.session_state["far_arbitres"][arbitres_dict[nom_sel]].get("Rapports", "[]"))
