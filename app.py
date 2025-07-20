@@ -10,7 +10,7 @@ from google_drive_utils import upload_to_drive
 from streamlit import secrets
 import uuid
 
-folder_id = st.secrets.get("1VRY2gQlO2lcI5AiKft2m75-bWUkWqB_Z", None) or "1VRY2gQlO2lcI5AiKft2m75-bWUkWqB_Z"  # fallback
+folder_id = "1Oe6hhlJuU2S8cK_u-eo-tdig1t8onhl_"  # fallback
 
 # === Initialisation session_state ===
 if "far_arbitres" not in st.session_state:
