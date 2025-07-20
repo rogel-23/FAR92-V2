@@ -793,7 +793,12 @@ if action == "📎 Déposer un rapport d'observation":
             f.write(uploaded_file.getbuffer())
 
         # 2. Lancer l’upload (le fichier existe maintenant)
-        url_partage = upload_to_drive("temp_upload.pdf", uploaded_file.name)
+        assert os.path.exists("temp_upload.pdf"), "Le fichier PDF n’a pas été généré"
+        try:
+            url_partage = upload_to_drive("temp_upload.pdf", uploaded_file.name, parent_folder_id=folder_id)
+        except Exception as e:
+            st.error(f"Erreur lors de l'upload sur Google Drive : {e}")
+            st.stop()
 
         # 3. Stocker l’URL dans l’arbitre concerné
         rapports = json.loads(st.session_state["far_arbitres"][arbitres_dict[nom_sel]].get("Rapports", "[]"))
