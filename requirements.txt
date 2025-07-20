@@ -1,0 +1,8 @@
+streamlit
+pandas
+openpyxl
+matplotlib
+python-docx
+google-api-python-client
+google-auth
+google-auth-oauthlib

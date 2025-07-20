@@ -1,0 +1,6 @@
+# Fichiers sensibles à ne jamais versionner
+service_account.json
+.streamlit/secrets.toml
+*.pyc
+__pycache__/
+*.xlsx
