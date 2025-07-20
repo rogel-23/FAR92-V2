@@ -786,27 +786,27 @@ if action == "📎 Déposer un rapport d'observation":
         submit = st.form_submit_button("✅ Enregistrer le rapport")
 
     if submit and nom_sel and uploaded_file:
-        # 1. Sauvegarder le fichier
-
-        temp_path = "/tmp/temp_upload.pdf"
-        with open("temp_upload.pdf", "wb") as f:
+        temp_path = "temp_upload.pdf"
+        with open(temp_path, "wb") as f:
             f.write(uploaded_file.getbuffer())
 
-        # 2. Lancer l’upload (le fichier existe maintenant)
-        assert os.path.exists("temp_upload.pdf"), "Le fichier PDF n’a pas été généré"
+        assert os.path.exists(temp_path), "Le fichier PDF n’a pas été généré"
+
         try:
-            url_partage = upload_to_drive("temp_upload.pdf", uploaded_file.name, parent_folder_id=folder_id)
+            folder_id = st.secrets["GOOGLE_DRIVE_FOLDER_ID"]
+            url_partage = upload_to_drive(temp_path, uploaded_file.name, parent_folder_id=folder_id)
+            os.remove(temp_path)
         except Exception as e:
             st.error(f"Erreur lors de l'upload sur Google Drive : {e}")
             st.stop()
 
-        # 3. Stocker l’URL dans l’arbitre concerné
         rapports = json.loads(st.session_state["far_arbitres"][arbitres_dict[nom_sel]].get("Rapports", "[]"))
         rapports.append({
             "nom_original": uploaded_file.name,
             "url": url_partage
         })
-        st.session_state["far_arbitres"][arbitres_dict[nom_sel]]["Rapports"] = json.dumps(rapports)
+        st.session_state["far_arbitres"][arbitres_dict[nom_sel]]["Rapports"] = json.dumps(rapports, ensure_ascii=False)
+
         save_arbitres(st.session_state["far_arbitres"])
         st.success("✅ Rapport envoyé sur Google Drive.")
         st.rerun()
