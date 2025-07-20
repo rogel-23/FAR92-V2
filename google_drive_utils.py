@@ -9,7 +9,7 @@ SCOPES = ['https://www.googleapis.com/auth/drive']
 def get_drive_service():
     if "SERVICE_ACCOUNT_JSON" in st.secrets:
         # ✅ MODE CLOUD (depuis Streamlit secrets)
-        service_account_info = json.loads(st.secrets["SERVICE_ACCOUNT_JSON"])
+        service_account_info = st.secrets["SERVICE_ACCOUNT_JSON"]
         credentials = service_account.Credentials.from_service_account_info(
             service_account_info, scopes=SCOPES
         )
