@@ -17,6 +17,24 @@ from urllib.parse import urlparse, unquote
 
 import unicodedata
 
+import streamlit as st
+
+# === Protection par mot de passe ===
+MOT_DE_PASSE = "FAR92!"  # 🔒 change ceci par ton mot de passe
+
+if "auth_ok" not in st.session_state:
+    st.session_state["auth_ok"] = False
+
+if not st.session_state["auth_ok"]:
+    mdp = st.text_input("🔒 Entrez le mot de passe :", type="password")
+    if mdp == MOT_DE_PASSE:
+        st.session_state["auth_ok"] = True
+        st.experimental_rerun()
+    elif mdp != "":
+        st.error("Mot de passe incorrect")
+    st.stop()
+
+
 def safe_load_json(val):
     """
     Tente de désérialiser une chaîne JSON en Python (liste ou dict).
