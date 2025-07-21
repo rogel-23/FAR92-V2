@@ -28,6 +28,21 @@ def list_rapports_for_arbitre(arbitre_id):
     
     return urls
 
+def delete_rapport_from_supabase(filepath):
+    """
+    Supprime un fichier du bucket Supabase.
+    """
+    SUPABASE_URL = st.secrets["SUPABASE_URL"]
+    SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
+    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+    bucket = "rapports"
+
+    try:
+        supabase.storage.from_(bucket).remove([filepath])
+    except Exception as e:
+        st.error(f"Erreur lors de la suppression : {e}")
+
+
 
 SCOPES = ['https://www.googleapis.com/auth/drive']
 

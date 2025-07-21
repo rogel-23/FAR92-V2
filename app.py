@@ -39,10 +39,11 @@ def upload_rapport_to_supabase(uploaded_file, arbitre_id):
         pass
 
     res = supabase.storage.from_(bucket).upload(filepath, uploaded_file.getvalue())
+    if hasattr(res, "status_code") and res.status_code == 409:
+        raise Exception("Un fichier du même nom existe déjà. Veuillez le renommer ou le supprimer avant l'upload.")
+    elif hasattr(res, "get") and res.get("error"):
+        raise Exception(f"Erreur Supabase : {res['error']['message']}")
 
-
-    if getattr(res, "error", None):
-        raise Exception(f"Erreur Supabase : {res.error.message}")
 
 
     public_url = supabase.storage.from_(bucket).get_public_url(filepath)
@@ -1013,6 +1014,13 @@ elif action == "👤 Fiche arbitre":
             if rapports:
                 for nom, url in rapports:
                     st.markdown(f"- [{nom}]({url})", unsafe_allow_html=True)
+                    col1, col2 = st.columns([3, 1])
+                    with col2:
+                        if st.button("🗑️ Supprimer", key=f"sup_{nom}"):
+                            filepath = url.split("/object/public/rapports/")[-1]
+                            delete_rapport_from_supabase(filepath)
+                            st.success(f"Rapport « {nom} » supprimé.")
+                            st.experimental_rerun()
             else:
                 st.info("Aucun rapport n’est encore associé à cet arbitre.")
         except Exception as e:
