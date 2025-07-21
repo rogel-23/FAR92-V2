@@ -133,11 +133,11 @@ with col_save:
 
     if is_local:
         if st.button("💾 Sauvegarder"):
-            df.to_excel("far_arbitres.xlsx", index=False)
+            df.to_excel("far_arbitres.xlsx", index=False, engine="openpyxl")
             st.success("Fichier Excel sauvegardé dans le dossier du projet.")
     else:
         buffer = BytesIO()
-        df.to_excel(buffer, index=False)
+        df.to_excel(buffer, index=False, engine="openpyxl")
         buffer.seek(0)
         st.download_button(
             "📥 Télécharger Excel",
