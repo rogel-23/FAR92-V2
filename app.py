@@ -196,7 +196,6 @@ with col1:
     "📊 Récapitulatif des examens",
     "🛑 Ajouter des manquements",
     "📉 Récapitulatif des manquements",
-    "📎 Déposer un rapport d'observation",
     "👤 Fiche arbitre",
     "➕ Ajouter / ❌ Supprimer un arbitre"
 ])
