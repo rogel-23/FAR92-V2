@@ -9,6 +9,7 @@ from datetime import datetime, date
 from google_drive_utils import upload_to_drive
 from streamlit import secrets
 import uuid
+st.write("Clés dans st.secrets :", list(st.secrets.keys()))
 
 folder_id = "1Oe6hhlJuU2S8cK_u-eo-tdig1t8onhl_"  # fallback
 
