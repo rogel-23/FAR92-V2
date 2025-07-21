@@ -1116,13 +1116,13 @@ elif action == "👤 Fiche arbitre":
                 hdr = table.rows[0].cells
                 hdr[0].text = "Date"
                 hdr[1].text = "Type"
-                hdr[2].text = "Détail"
+                hdr[2].text = "Commentaire"
 
                 for m in mqs:
                     row = table.add_row().cells
                     row[0].text = m.get("Date", "")
                     row[1].text = m.get("Type", "")
-                    row[2].text = m.get("Détail", "")
+                    row[2].text = m.get("Commentaire", "")
 
             # === Position globale dans la catégorie ===
             cat = a.get("Catégorie")
