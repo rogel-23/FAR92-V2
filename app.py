@@ -170,7 +170,7 @@ with col_save:
     df.to_excel(buffer, index=False, engine="openpyxl")
     buffer.seek(0)
     st.download_button(
-        "💾 Sauvegarder",
+        "💾 Sauvegarde",
         data=buffer,
         file_name="far_arbitres.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
