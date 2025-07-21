@@ -17,6 +17,23 @@ from urllib.parse import urlparse, unquote
 
 import unicodedata
 
+def safe_load_json(val):
+    """
+    Tente de désérialiser une chaîne JSON en Python (liste ou dict).
+    Si val est déjà une liste/dict, retourne tel quel.
+    Si val est invalide ou None, retourne une liste vide.
+    """
+    if isinstance(val, str):
+        try:
+            return json.loads(val)
+        except json.JSONDecodeError:
+            return []
+    elif isinstance(val, (list, dict)):
+        return val
+    else:
+        return []
+
+
 def nettoyer_nom_supabase(texte):
     # Supprime les accents, trémas, etc.
     texte = unicodedata.normalize('NFKD', texte).encode('ASCII', 'ignore').decode('utf-8')
@@ -255,17 +272,7 @@ elif action == "📝 Compte-rendu rassemblement":
 
             if submit and nom_rass:
                 for i, a in enumerate(st.session_state["far_arbitres"]):
-                    val = a.get("Rassemblements", "[]")
-                    if isinstance(val, str):
-                        try:
-                            rass = json.loads(val)
-                        except:
-                            rass = []
-                    elif isinstance(val, list):
-                        rass = val
-                    else:
-                        rass = []
-
+                    rass = safe_load_json(a.get("Rassemblements"))
                     rass = [r for r in rass if r.get("Nom") != nom_rass]
 
                     rass.append({
@@ -303,17 +310,7 @@ elif action == "📝 Compte-rendu rassemblement":
 
             if submit and nom_stage:
                 for i, a in enumerate(st.session_state["far_arbitres"]):
-                    val = a.get("Rassemblements", "[]")
-                    if isinstance(val, str):
-                        try:
-                            rass = json.loads(val)
-                        except:
-                            rass = []
-                    elif isinstance(val, list):
-                        rass = val
-                    else:
-                        rass = []
-
+                    rass = safe_load_json(a.get("Rassemblements"))
                     rass = [r for r in rass if r.get("Nom") != nom_stage]
 
                     rass.append({
@@ -354,17 +351,7 @@ elif action == "📝 Compte-rendu rassemblement":
 
             if submit and nom_test:
                 for i, a in enumerate(st.session_state["far_arbitres"]):
-                    val = a.get("Rassemblements", "[]")
-                    if isinstance(val, str):
-                        try:
-                            rass = json.loads(val)
-                        except:
-                            rass = []
-                    elif isinstance(val, list):
-                        rass = val
-                    else:
-                        rass = []
-
+                    rass = safe_load_json(a.get("Rassemblements"))
                     rass = [r for r in rass if r.get("Nom") != nom_test]
                     nom_complet = f"{a['Prénom']} {a['Nom']}"
                     rass.append({
@@ -935,17 +922,7 @@ elif action == "👤 Fiche arbitre":
         st.markdown(f"- 📞 Tel : {tel}  |  ✉️ Email : {email}")
 
         # === Rassemblements ===
-        val = a.get("Rassemblements", "[]")
-        if isinstance(val, str):
-            try:
-                rass = json.loads(val)
-            except:
-                rass = []
-        elif isinstance(val, list):
-            rass = val
-        else:
-            rass = []
-
+        rass = safe_load_json(a.get("Rassemblements"))
         if rass:
             st.markdown("### 📋 Rassemblements")
 
@@ -983,17 +960,7 @@ elif action == "👤 Fiche arbitre":
 
 
         # === Examens ===
-            val = a.get("Examens", "[]")
-            if isinstance(val, str):
-                try:
-                    exam = json.loads(val)
-                except:
-                    exam = []
-            elif isinstance(val, list):
-                exam = val
-            else:
-                exam = []
-
+            exam = safe_load_json(a.get("Examens"))
             if exam:
                 st.markdown("#### 🧠 Examens")
                 for e in exam:
@@ -1017,17 +984,7 @@ elif action == "👤 Fiche arbitre":
                 total_points = 0
 
                 # Total de l'arbitre courant
-                val = a.get("Examens", "[]")
-                if isinstance(val, str):
-                    try:
-                        exam = json.loads(val)
-                    except:
-                        exam = []
-                elif isinstance(val, list):
-                    exam = val
-                else:
-                    exam = []
-
+                exam = safe_load_json(a.get("Examens"))
                 for e in exam:
                     try:
                         total_points += float(e.get("Note", e.get("Total", 0)))
@@ -1058,20 +1015,7 @@ elif action == "👤 Fiche arbitre":
 
 
         # === Manquements ===
-        val = a.get("Manquements", "")
-        try:
-            val = a.get("Manquements", "[]")
-            if isinstance(val, str):
-                try:
-                    mqs = json.loads(val)
-                except:
-                    mqs = []
-            elif isinstance(val, list):
-                mqs = val
-            else:
-                mqs = []
-        except:
-            mqs = []
+        mqs = safe_load_json(a.get("Manquements"))
 
         if mqs:
             st.markdown("#### 🚫 Manquements")
@@ -1128,10 +1072,7 @@ elif action == "👤 Fiche arbitre":
 
             # === Examens ===
             exams_raw = a.get("Examens", "")
-            try:
-                exams = json.loads(exams_raw if isinstance(exams_raw, str) else "")
-            except:
-                exams = []
+            exams = safe_load_json(exams_raw)
 
             if exams:
                 doc.add_heading("Examens", level=2)
@@ -1167,10 +1108,7 @@ elif action == "👤 Fiche arbitre":
 
             # === Rassemblements ===
             rass_raw = a.get("Rassemblements", "")
-            try:
-                rass = json.loads(rass_raw if isinstance(rass_raw, str) else "")
-            except:
-                rass = []
+            rass = safe_load_json(rass_raw)
 
             if rass:
                 rass.sort(key=lambda r: datetime.strptime(r.get("Date", "01/01/1900"), "%d/%m/%Y"))
@@ -1193,20 +1131,7 @@ elif action == "👤 Fiche arbitre":
                     row[4].text = r.get("Observations individuelles", "")
 
             # === Manquements ===
-            val = a.get("Manquements", "")
-            try:
-                val = a.get("Manquements", "[]")
-                if isinstance(val, str):
-                    try:
-                        mqs = json.loads(val)
-                    except:
-                        mqs = []
-                elif isinstance(val, list):
-                    mqs = val
-                else:
-                    mqs = []
-            except:
-                mqs = []
+            mqs = safe_load_json(a.get("Manquements"))
 
             if mqs:
                 doc.add_heading("Manquements", level=2)
