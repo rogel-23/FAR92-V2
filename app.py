@@ -13,7 +13,7 @@ st.write("Clés dans st.secrets :", list(st.secrets.keys()))
 from supabase import create_client
 from google_drive_utils import list_rapports_for_arbitre  
 from google_drive_utils import delete_rapport_from_supabase
-from urllib.parse import urlparse
+from urllib.parse import urlparse, unquote
 
 
 def upload_rapport_to_supabase(uploaded_file, arbitre_id):
@@ -1013,19 +1013,22 @@ elif action == "👤 Fiche arbitre":
         st.markdown("### 📎 Rapports associés")
         try:
             rapports = list_rapports_for_arbitre(f"{a['Nom'].upper()}_{a['Prénom']}".replace(" ", "_"))
-            if rapports:
-                for nom, url in rapports:
-                    col1, col2 = st.columns([4, 1])
-                    with col1:
-                        st.markdown(f"- [{nom}]({url})", unsafe_allow_html=True)
-                    with col2:
-                        if st.button(f"🗑️ Supprimer {nom}", key=f"del_{nom}"):
-                            try:
-                                delete_rapport_from_supabase(f"{a['Nom'].upper()}_{a['Prénom']}".replace(" ", "_"), nom)
-                                st.success("Rapport supprimé avec succès.")
-                                st.rerun()
-                            except Exception as e:
-                                st.error(f"Erreur lors de la suppression : {e}")
+            for nom, url in rapports:
+                # Nettoyage du nom de fichier depuis l'URL
+                parsed_url = urlparse(url)
+                clean_nom = unquote(parsed_url.path.split("/")[-1])
+
+                col1, col2 = st.columns([4, 1])
+                with col1:
+                    st.markdown(f"- [{clean_nom}]({url})", unsafe_allow_html=True)
+                with col2:
+                    if st.button(f"🗑️ Supprimer {clean_nom}", key=f"del_{clean_nom}"):
+                        try:
+                            delete_rapport_from_supabase(f"{a['Nom'].upper()}_{a['Prénom']}".replace(" ", "_"), clean_nom)
+                            st.success("Rapport supprimé avec succès.")
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"Erreur lors de la suppression : {e}")
             else:
                 st.info("Aucun rapport n’est encore associé à cet arbitre.")
         except Exception as e:
