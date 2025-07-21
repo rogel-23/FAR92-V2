@@ -22,25 +22,17 @@ def upload_rapport_to_supabase(uploaded_file, arbitre_id):
     supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
     bucket = "rapports"
 
-    # Chemin dans Supabase
     filepath = f"{arbitre_id}/{uploaded_file.name}"
 
-    # Supprime le fichier s’il existe déjà
-    try:
-        supabase.storage.from_(bucket).remove([filepath])
-    except Exception as e:
-        st.warning(f"(Suppression ancienne version ignorée) : {e}")
+    # Upload avec écrasement autorisé
+    res = supabase.storage.from_(bucket).upload(filepath, uploaded_file.getvalue(), upsert=True)
 
-    # Upload le fichier
-    res = supabase.storage.from_(bucket).upload(filepath, uploaded_file.getvalue(), {"upsert": True})
-
-    # Gestion d’erreur explicite
     if res.data is None:
         raise Exception(f"Erreur Supabase : {res.error.message if res.error else 'inconnue'}")
 
-    # Récupère l’URL publique
     public_url = supabase.storage.from_(bucket).get_public_url(filepath)
     return public_url
+
 
 folder_id = "1Oe6hhlJuU2S8cK_u-eo-tdig1t8onhl_"  # fallback
 
