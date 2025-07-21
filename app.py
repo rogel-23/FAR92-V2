@@ -1008,7 +1008,8 @@ elif action == "👤 Fiche arbitre":
 
         st.markdown("### 📎 Rapports associés")
         try:
-            rapports = list_rapports_for_arbitre(arbitre["ID"])  # ou 'Identifiant', ou autre champ utilisé
+            arbitre_id = f"{a['Nom'].upper()}_{a['Prénom']}".replace(" ", "_")
+            rapports = list_rapports_for_arbitre(arbitre_id)
             if rapports:
                 for nom, url in rapports:
                     st.markdown(f"- [{nom}]({url})", unsafe_allow_html=True)
