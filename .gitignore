@@ -4,3 +4,4 @@ service_account.json
 *.pyc
 __pycache__/
 *.xlsx
+.streamlit/secrets.toml
