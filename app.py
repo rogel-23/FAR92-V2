@@ -29,7 +29,7 @@ if not st.session_state["auth_ok"]:
     mdp = st.text_input("🔒 Entrez le mot de passe :", type="password")
     if mdp == MOT_DE_PASSE:
         st.session_state["auth_ok"] = True
-        st.experimental_rerun()
+        st.rerun()
     elif mdp != "":
         st.error("Mot de passe incorrect")
     st.stop()
