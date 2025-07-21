@@ -983,7 +983,17 @@ elif action == "👤 Fiche arbitre":
 
 
         # === Examens ===
-            exam = json.loads(a.get("Examens", "") or "[]")
+            val = a.get("Examens", "[]")
+            if isinstance(val, str):
+                try:
+                    exam = json.loads(val)
+                except:
+                    exam = []
+            elif isinstance(val, list):
+                exam = val
+            else:
+                exam = []
+
             if exam:
                 st.markdown("#### 🧠 Examens")
                 for e in exam:
@@ -1007,7 +1017,17 @@ elif action == "👤 Fiche arbitre":
                 total_points = 0
 
                 # Total de l'arbitre courant
-                exam = json.loads(a.get("Examens", "") or "[]")
+                val = a.get("Examens", "[]")
+                if isinstance(val, str):
+                    try:
+                        exam = json.loads(val)
+                    except:
+                        exam = []
+                elif isinstance(val, list):
+                    exam = val
+                else:
+                    exam = []
+
                 for e in exam:
                     try:
                         total_points += float(e.get("Note", e.get("Total", 0)))
@@ -1040,7 +1060,16 @@ elif action == "👤 Fiche arbitre":
         # === Manquements ===
         val = a.get("Manquements", "")
         try:
-            mqs = json.loads(val if isinstance(val, str) else "")
+            val = a.get("Manquements", "[]")
+            if isinstance(val, str):
+                try:
+                    mqs = json.loads(val)
+                except:
+                    mqs = []
+            elif isinstance(val, list):
+                mqs = val
+            else:
+                mqs = []
         except:
             mqs = []
 
@@ -1166,7 +1195,16 @@ elif action == "👤 Fiche arbitre":
             # === Manquements ===
             val = a.get("Manquements", "")
             try:
-                mqs = json.loads(val if isinstance(val, str) else "")
+                val = a.get("Manquements", "[]")
+                if isinstance(val, str):
+                    try:
+                        mqs = json.loads(val)
+                    except:
+                        mqs = []
+                elif isinstance(val, list):
+                    mqs = val
+                else:
+                    mqs = []
             except:
                 mqs = []
 
