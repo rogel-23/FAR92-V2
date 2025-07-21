@@ -6,4 +6,4 @@ python-docx
 google-api-python-client
 google-auth
 google-auth-oauthlib
-supabase
+supabase>=2.0.3
