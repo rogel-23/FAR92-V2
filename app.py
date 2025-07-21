@@ -24,6 +24,12 @@ def upload_rapport_to_supabase(uploaded_file, arbitre_id):
 
     filepath = f"{arbitre_id}/{uploaded_file.name}"
 
+    # Supprimer l’ancien fichier s’il existe
+    delete_res = supabase.storage.from_(bucket).remove([filepath])
+    if getattr(delete_res, "error", None):
+        if delete_res.error.message != "The resource does not exist":
+            raise Exception(f"Erreur lors de la suppression : {delete_res.error.message}")
+
     # Upload avec écrasement autorisé
     try:
         supabase.storage.from_(bucket).remove([filepath])
