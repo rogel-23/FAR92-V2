@@ -204,7 +204,7 @@ if action == "➕ Ajouter / ❌ Supprimer un arbitre":
         submit = st.form_submit_button("Ajouter")
 
         if submit and nom and prenom:
-            today = datetime.date.today()
+            today = date.today()
             age = today.year - date_naissance.year - ((today.month, today.day) < (date_naissance.month, date_naissance.day))
             st.session_state["far_arbitres"].append({
                 "Nom": nom, "Prénom": prenom, "Catégorie": categorie,
