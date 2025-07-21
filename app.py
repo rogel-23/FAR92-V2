@@ -136,6 +136,7 @@ with col_save:
             df.to_excel("far_arbitres.xlsx", index=False, engine="openpyxl")
             st.success("Fichier Excel sauvegardé dans le dossier du projet.")
     else:
+        # Pas besoin de bouton, le bouton "Télécharger" apparaît directement
         buffer = BytesIO()
         df.to_excel(buffer, index=False, engine="openpyxl")
         buffer.seek(0)
