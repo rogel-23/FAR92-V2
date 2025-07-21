@@ -13,6 +13,7 @@ st.write("Clés dans st.secrets :", list(st.secrets.keys()))
 from supabase import create_client
 from google_drive_utils import list_rapports_for_arbitre  
 from google_drive_utils import delete_rapport_from_supabase
+from urllib.parse import urlparse
 
 
 def upload_rapport_to_supabase(uploaded_file, arbitre_id):
@@ -1006,26 +1007,30 @@ elif action == "👤 Fiche arbitre":
             df_manq = df_manq[[c for c in colonnes if c in df_manq.columns]]
             df_manq.index = df_manq.index + 1
             st.dataframe(df_manq, use_container_width=True)
-        
 
+
+        # 📎 Rapports associés
         st.markdown("### 📎 Rapports associés")
         try:
-            arbitre_id = f"{a['Nom'].upper()}_{a['Prénom']}".replace(" ", "_")
-            rapports = list_rapports_for_arbitre(arbitre_id)
+            rapports = list_rapports_for_arbitre(a["ID"])
             if rapports:
                 for nom, url in rapports:
-                    st.markdown(f"- [{nom}]({url})", unsafe_allow_html=True)
-                    col1, col2 = st.columns([3, 1])
+                    col1, col2 = st.columns([4, 1])
+                    with col1:
+                        st.markdown(f"- [{nom}]({url})", unsafe_allow_html=True)
                     with col2:
-                        if st.button("🗑️ Supprimer", key=f"sup_{nom}"):
-                            filepath = url.split("/object/public/rapports/")[-1]
-                            delete_rapport_from_supabase(filepath)
-                            st.success(f"Rapport « {nom} » supprimé.")
-                            st.rerun()
+                        if st.button(f"🗑️ Supprimer {nom}", key=f"del_{nom}"):
+                            try:
+                                delete_rapport_from_supabase(a["ID"], nom)
+                                st.success("Rapport supprimé avec succès.")
+                                st.rerun()
+                            except Exception as e:
+                                st.error(f"Erreur lors de la suppression : {e}")
             else:
                 st.info("Aucun rapport n’est encore associé à cet arbitre.")
         except Exception as e:
             st.error(f"Erreur lors de la récupération des rapports : {e}")
+
 
 
         # === Boutons Word ===

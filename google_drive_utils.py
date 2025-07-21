@@ -28,19 +28,26 @@ def list_rapports_for_arbitre(arbitre_id):
     
     return urls
 
-def delete_rapport_from_supabase(filepath):
+def delete_rapport_from_supabase(arbitre_id, nom_fichier):
     """
-    Supprime un fichier du bucket Supabase.
+    Supprime un rapport PDF d’un arbitre dans Supabase.
     """
+    from supabase import create_client
+    import streamlit as st
+
     SUPABASE_URL = st.secrets["SUPABASE_URL"]
     SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
+
     supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
     bucket = "rapports"
+    path = f"{arbitre_id}/{nom_fichier}"
 
     try:
-        supabase.storage.from_(bucket).remove([filepath])
+        res = supabase.storage.from_(bucket).remove([path])
+        return res
     except Exception as e:
-        st.error(f"Erreur lors de la suppression : {e}")
+        raise Exception(f"Erreur lors de la suppression : {e}")
+
 
 
 
