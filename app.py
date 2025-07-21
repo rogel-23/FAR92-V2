@@ -1021,7 +1021,7 @@ elif action == "👤 Fiche arbitre":
                             filepath = url.split("/object/public/rapports/")[-1]
                             delete_rapport_from_supabase(filepath)
                             st.success(f"Rapport « {nom} » supprimé.")
-                            st.experimental_rerun()
+                            st.rerun()
             else:
                 st.info("Aucun rapport n’est encore associé à cet arbitre.")
         except Exception as e:
