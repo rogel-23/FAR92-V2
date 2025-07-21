@@ -11,6 +11,8 @@ from streamlit import secrets
 import uuid
 st.write("Clés dans st.secrets :", list(st.secrets.keys()))
 from supabase import create_client
+from google_drive_utils import list_rapports_for_arbitre  
+
 
 def upload_rapport_to_supabase(uploaded_file, arbitre_id):
     """
@@ -46,6 +48,31 @@ def upload_rapport_to_supabase(uploaded_file, arbitre_id):
     public_url = supabase.storage.from_(bucket).get_public_url(filepath)
     return public_url
 
+def list_rapports_for_arbitre(arbitre_id):
+    """
+    Retourne la liste des fichiers (URL publiques) déjà associés à un arbitre.
+    """
+    SUPABASE_URL = st.secrets["SUPABASE_URL"]
+    SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
+    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+    bucket = "rapports"
+
+    # Liste des fichiers dans le dossier de l’arbitre
+    res = supabase.storage.from_(bucket).list(path=arbitre_id)
+
+    if getattr(res, "error", None):
+        raise Exception(f"Erreur Supabase (list) : {res.error.message}")
+
+    fichiers = res  # Liste d’objets {'name': ..., 'created_at': ..., ...}
+    
+    # Génère les URLs publiques
+    urls = []
+    for fichier in fichiers:
+        path = f"{arbitre_id}/{fichier['name']}"
+        url = supabase.storage.from_(bucket).get_public_url(path)
+        urls.append((fichier["name"], url))
+    
+    return urls
 
 folder_id = "1Oe6hhlJuU2S8cK_u-eo-tdig1t8onhl_"  # fallback
 
@@ -979,67 +1006,16 @@ elif action == "👤 Fiche arbitre":
             st.dataframe(df_manq, use_container_width=True)
         
 
-        # === Rapports d'observation ===
-        st.markdown("### 📁 Rapports d'observation")
-        raw_rapports = json.loads(a.get("Rapports", "[]"))
-
-        # Compatibilité : transformer ancienne liste de strings en dicts
-        rapports = []
-        for r in raw_rapports:
-            if isinstance(r, str):
-                rapports.append({"fichier": r, "nom_original": r})
+        st.markdown("### 📎 Rapports associés")
+        try:
+            rapports = list_rapports_for_arbitre(arbitre["ID"])  # ou 'Identifiant', ou autre champ utilisé
+            if rapports:
+                for nom, url in rapports:
+                    st.markdown(f"- [{nom}]({url})", unsafe_allow_html=True)
             else:
-                rapports.append(r)
-
-        if rapports:
-            for i, rapport in enumerate(rapports):
-                nom_affiche = rapport.get("nom_original", f"rapport_{i+1}")
-
-                # === Cas 1 : lien Google Drive
-                if "url" in rapport:
-                    url = rapport["url"]
-                    col1, col2 = st.columns([6, 1])
-                    with col1:
-                        st.markdown(f"📄 [{nom_affiche}]({url})", unsafe_allow_html=True)
-                    with col2:
-                        if st.button("🗑️", key=f"del_drive_{i}"):
-                            rapports.pop(i)
-                            a["Rapports"] = json.dumps(rapports)
-                            save_arbitres(st.session_state["far_arbitres"])
-                            st.success(f"Rapport supprimé : {nom_affiche}")
-                            st.rerun()
-
-                # === Cas 2 : fichier local
-                elif "fichier" in rapport:
-                    nom_fichier = rapport["fichier"]
-                    path = os.path.join("rapports", nom_fichier)
-                    if os.path.exists(path):
-                        col1, col2 = st.columns([6, 1])
-                        with col1:
-                            with open(path, "rb") as f:
-                                st.download_button(
-                                    label=f"📥 Télécharger {nom_affiche}",
-                                    data=f,
-                                    file_name=nom_fichier,
-                                    mime="application/octet-stream",
-                                    key=f"dl_{nom_fichier}_{i}"
-                                )
-                        with col2:
-                            if st.button("🗑️", key=f"del_local_{i}"):
-                                try:
-                                    os.remove(path)
-                                except Exception as e:
-                                    st.warning(f"Impossible de supprimer le fichier : {e}")
-                                rapports.pop(i)
-                                a["Rapports"] = json.dumps(rapports)
-                                save_arbitres(st.session_state["far_arbitres"])
-                                st.success(f"Rapport supprimé : {nom_affiche}")
-                                st.rerun()
-        else:
-            st.info("Aucun rapport enregistré.")
-
-
-
+                st.info("Aucun rapport n’est encore associé à cet arbitre.")
+        except Exception as e:
+            st.error(f"Erreur lors de la récupération des rapports : {e}")
 
 
         # === Boutons Word ===
