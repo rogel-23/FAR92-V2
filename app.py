@@ -131,21 +131,15 @@ with col_save:
     # Test : exécution locale ou non
     is_local = os.path.exists(".git") or os.getenv("STREAMLIT_ENV") != "cloud"
 
-    if is_local:
-        if st.button("💾 Sauvegarder"):
-            df.to_excel("far_arbitres.xlsx", index=False, engine="openpyxl")
-            st.success("Fichier Excel sauvegardé dans le dossier du projet.")
-    else:
-        # Pas besoin de bouton, le bouton "Télécharger" apparaît directement
-        buffer = BytesIO()
-        df.to_excel(buffer, index=False, engine="openpyxl")
-        buffer.seek(0)
-        st.download_button(
-            "📥 Télécharger Excel",
-            data=buffer,
-            file_name="far_arbitres.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
+    buffer = BytesIO()
+    df.to_excel(buffer, index=False, engine="openpyxl")
+    buffer.seek(0)
+    st.download_button(
+        "📥 Télécharger Excel",
+        data=buffer,
+        file_name="far_arbitres.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
 
 
 # === CHARGEMENT INITIAL D'UN FICHIER EXCEL ===
