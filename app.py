@@ -437,7 +437,7 @@ elif action == "🛑 Ajouter des manquements":
     # Liste des rassemblements disponibles
     all_rass_names = set()
     for a in st.session_state["far_arbitres"]:
-        rass = safe_load_json(a.get("Rassemblements"))
+        rass_list = safe_load_json(a.get("Rassemblements"))
         for r in rass_list:
             all_rass_names.add(r["Nom"])
     rass_names = sorted(list(all_rass_names))
