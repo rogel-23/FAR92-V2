@@ -25,7 +25,13 @@ def upload_rapport_to_supabase(uploaded_file, arbitre_id):
     filepath = f"{arbitre_id}/{uploaded_file.name}"
 
     # Upload avec écrasement autorisé
-    res = supabase.storage.from_(bucket).upload(filepath, uploaded_file.getvalue(), upsert=True)
+    try:
+        supabase.storage.from_(bucket).remove([filepath])
+    except:
+        pass
+
+    res = supabase.storage.from_(bucket).upload(filepath, uploaded_file.getvalue())
+
 
     if res.data is None:
         raise Exception(f"Erreur Supabase : {res.error.message if res.error else 'inconnue'}")
