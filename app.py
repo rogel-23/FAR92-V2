@@ -33,8 +33,9 @@ def upload_rapport_to_supabase(uploaded_file, arbitre_id):
     res = supabase.storage.from_(bucket).upload(filepath, uploaded_file.getvalue())
 
 
-    if res.data is None:
-        raise Exception(f"Erreur Supabase : {res.error.message if res.error else 'inconnue'}")
+    if getattr(res, "error", None):
+        raise Exception(f"Erreur Supabase : {res.error.message}")
+
 
     public_url = supabase.storage.from_(bucket).get_public_url(filepath)
     return public_url
