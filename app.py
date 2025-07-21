@@ -1012,7 +1012,7 @@ elif action == "👤 Fiche arbitre":
                     with col1:
                         st.markdown(f"- [{nom}]({url})", unsafe_allow_html=True)
                     with col2:
-                        if st.button(f"🗑️ Supprimer {nom}", key=f"del_{nom}"):
+                        if st.button(f"🗑️ Supprimer"):
                             try:
                                 delete_rapport_from_supabase(f"{a['Nom'].upper()}_{a['Prénom']}".replace(" ", "_"), nom)
                                 st.success("Rapport supprimé avec succès.")
