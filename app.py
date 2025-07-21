@@ -996,7 +996,7 @@ elif action == "👤 Fiche arbitre":
         if mqs:
             st.markdown("#### 🚫 Manquements")
             df_manq = pd.DataFrame(mqs)
-            colonnes = ["Date", "Type", "Détail", "Commentaire"]
+            colonnes = ["Date", "Type", "Commentaire"]
             df_manq = df_manq[[c for c in colonnes if c in df_manq.columns]]
             df_manq.index = df_manq.index + 1
             st.dataframe(df_manq, use_container_width=True)
