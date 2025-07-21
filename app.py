@@ -255,7 +255,17 @@ elif action == "📝 Compte-rendu rassemblement":
 
             if submit and nom_rass:
                 for i, a in enumerate(st.session_state["far_arbitres"]):
-                    rass = json.loads(a.get("Rassemblements", "") or "[]")
+                    val = a.get("Rassemblements", "[]")
+                    if isinstance(val, str):
+                        try:
+                            rass = json.loads(val)
+                        except:
+                            rass = []
+                    elif isinstance(val, list):
+                        rass = val
+                    else:
+                        rass = []
+
                     rass = [r for r in rass if r.get("Nom") != nom_rass]
 
                     rass.append({
@@ -293,7 +303,17 @@ elif action == "📝 Compte-rendu rassemblement":
 
             if submit and nom_stage:
                 for i, a in enumerate(st.session_state["far_arbitres"]):
-                    rass = json.loads(a.get("Rassemblements", "") or "[]")
+                    val = a.get("Rassemblements", "[]")
+                    if isinstance(val, str):
+                        try:
+                            rass = json.loads(val)
+                        except:
+                            rass = []
+                    elif isinstance(val, list):
+                        rass = val
+                    else:
+                        rass = []
+
                     rass = [r for r in rass if r.get("Nom") != nom_stage]
 
                     rass.append({
@@ -334,7 +354,17 @@ elif action == "📝 Compte-rendu rassemblement":
 
             if submit and nom_test:
                 for i, a in enumerate(st.session_state["far_arbitres"]):
-                    rass = json.loads(a.get("Rassemblements", "") or "[]")
+                    val = a.get("Rassemblements", "[]")
+                    if isinstance(val, str):
+                        try:
+                            rass = json.loads(val)
+                        except:
+                            rass = []
+                    elif isinstance(val, list):
+                        rass = val
+                    else:
+                        rass = []
+
                     rass = [r for r in rass if r.get("Nom") != nom_test]
                     nom_complet = f"{a['Prénom']} {a['Nom']}"
                     rass.append({
@@ -905,7 +935,17 @@ elif action == "👤 Fiche arbitre":
         st.markdown(f"- 📞 Tel : {tel}  |  ✉️ Email : {email}")
 
         # === Rassemblements ===
-        rass = json.loads(a.get("Rassemblements", "") or "[]")
+        val = a.get("Rassemblements", "[]")
+        if isinstance(val, str):
+            try:
+                rass = json.loads(val)
+            except:
+                rass = []
+        elif isinstance(val, list):
+            rass = val
+        else:
+            rass = []
+
         if rass:
             st.markdown("### 📋 Rassemblements")
 
