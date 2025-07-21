@@ -31,7 +31,7 @@ def upload_rapport_to_supabase(uploaded_file, arbitre_id):
     except:
         pass
 
-    res = supabase.storage.from_(bucket).upload(filepath, uploaded_file)
+    res = supabase.storage.from_(bucket).upload(filepath, uploaded_file.getvalue())
 
     if res.get("error"):
         raise Exception(f"Erreur Supabase : {res['error']['message']}")
