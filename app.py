@@ -17,8 +17,12 @@ from urllib.parse import urlparse, unquote
 
 import unicodedata
 
-import streamlit as st
 
+st.set_page_config(
+    page_title="FAR 92",  # ✅ Titre personnalisé de l'onglet
+    page_icon="⚽",       # ✅ Icône personnalisée (emoji ou URL vers une image)
+    layout="wide"
+)
 # === Protection par mot de passe ===
 MOT_DE_PASSE = "FAR92!"  # 🔒 change ceci par ton mot de passe
 
