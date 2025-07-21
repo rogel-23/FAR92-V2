@@ -10,6 +10,35 @@ from google_drive_utils import upload_to_drive
 from streamlit import secrets
 import uuid
 st.write("Clés dans st.secrets :", list(st.secrets.keys()))
+from supabase import create_client
+
+def upload_rapport_to_supabase(uploaded_file, arbitre_id):
+    """
+    Upload un fichier PDF dans Supabase dans un dossier nommé par l'ID de l'arbitre.
+    Renvoie l'URL publique du fichier.
+    """
+    SUPABASE_URL = st.secrets["SUPABASE_URL"]
+    SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
+
+    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+    bucket = "rapports"
+
+    filepath = f"{arbitre_id}/{uploaded_file.name}"
+
+    # Supprime l'ancien fichier s’il existe déjà
+    try:
+        supabase.storage.from_(bucket).remove([filepath])
+    except:
+        pass
+
+    res = supabase.storage.from_(bucket).upload(filepath, uploaded_file)
+
+    if res.get("error"):
+        raise Exception(f"Erreur Supabase : {res['error']['message']}")
+
+    public_url = f"{SUPABASE_URL}/storage/v1/object/public/{bucket}/{filepath}"
+    return public_url
+
 
 folder_id = "1Oe6hhlJuU2S8cK_u-eo-tdig1t8onhl_"  # fallback
 
@@ -1139,6 +1168,25 @@ elif action == "👤 Fiche arbitre":
 
             return doc
 
+        st.subheader("📎 Rapport d'observation")
+
+        uploaded_file = st.file_uploader("Ajouter un rapport PDF", type=["pdf"], key=f"rapport_{a['Nom']}_{a['Prénom']}")
+
+        if uploaded_file:
+            try:
+                arbitre_id = f"{a['Nom'].upper()}_{a['Prénom']}".replace(" ", "_")
+                url = upload_rapport_to_supabase(uploaded_file, arbitre_id)
+                st.success("Rapport téléversé avec succès !")
+                st.markdown(f"[📄 Voir le rapport]({url})")
+
+                # Mise à jour dans la fiche (temporaire en session)
+                a["Rapport observation"] = url
+
+            except Exception as e:
+                st.error(f"Erreur : {e}")
+
+        if a.get("Rapport observation"):
+            st.markdown(f"📁 Rapport déjà enregistré : [Voir le rapport]({a['Rapport observation']})")
 
         st.divider()
         col1, col2 = st.columns(2)
