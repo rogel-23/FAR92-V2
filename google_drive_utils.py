@@ -6,6 +6,7 @@ from googleapiclient.http import MediaFileUpload
 from supabase import create_client
 import unicodedata
 
+
 def nettoyer_nom_supabase(texte):
     """Supprime les accents et remplace les espaces par des underscores"""
     texte = unicodedata.normalize('NFKD', texte).encode('ASCII', 'ignore').decode('utf-8')

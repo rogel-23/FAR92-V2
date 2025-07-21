@@ -194,8 +194,8 @@ with col1:
 if action == "➕ Ajouter / ❌ Supprimer un arbitre":
     st.subheader("➕ Ajouter un arbitre")
     with st.form("ajout_arbitre_form"):
-        nom = st.text_input("Nom").upper()
-        prenom = st.text_input("Prénom")
+        nom = st.text_input("Nom (sans accents)").upper()
+        prenom = st.text_input("Prénom (sans accents)")
         categorie = st.selectbox("Catégorie FAR", ["FAR-S1", "FAR-S2", "FAR-A1", "FAR-J1", "FAR-F1"])
         date_naissance = st.date_input("Date de naissance", min_value=date(1900, 1, 1))
         club = st.text_input("Club")
