@@ -1012,7 +1012,7 @@ elif action == "👤 Fiche arbitre":
         # 📎 Rapports associés
         st.markdown("### 📎 Rapports associés")
         try:
-            rapports = list_rapports_for_arbitre(a["ID"])
+            rapports = list_rapports_for_arbitre(f"{a['Nom'].upper()}_{a['Prénom']}".replace(" ", "_"))
             if rapports:
                 for nom, url in rapports:
                     col1, col2 = st.columns([4, 1])
@@ -1021,7 +1021,7 @@ elif action == "👤 Fiche arbitre":
                     with col2:
                         if st.button(f"🗑️ Supprimer {nom}", key=f"del_{nom}"):
                             try:
-                                delete_rapport_from_supabase(a["ID"], nom)
+                                delete_rapport_from_supabase(f"{a['Nom'].upper()}_{a['Prénom']}".replace(" ", "_"), nom)
                                 st.success("Rapport supprimé avec succès.")
                                 st.rerun()
                             except Exception as e:
