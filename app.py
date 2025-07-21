@@ -9,7 +9,6 @@ from datetime import datetime, date
 from google_drive_utils import upload_to_drive
 from streamlit import secrets
 import uuid
-st.write("Clés dans st.secrets :", list(st.secrets.keys()))
 from supabase import create_client
 from google_drive_utils import list_rapports_for_arbitre  
 from google_drive_utils import delete_rapport_from_supabase
