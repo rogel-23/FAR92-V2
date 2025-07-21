@@ -861,47 +861,6 @@ elif action == "📊 Récapitulatif des examens":
             else:
                 st.info("Aucun arbitre n'était concerné par cet examen.")
 
-if action == "📎 Déposer un rapport d'observation":
-    st.subheader("📎 Déposer un rapport pour un arbitre")
-
-    # Sélection de l’arbitre
-    arbitres_dict = {f"{a['Prénom']} {a['Nom']}": i for i, a in enumerate(st.session_state["far_arbitres"])}
-
-    with st.form("upload_rapport_form"):
-        nom_sel = st.selectbox("👤 Sélectionner un arbitre", [""] + list(arbitres_dict.keys()))
-        uploaded_file = st.file_uploader("📄 Déposer un rapport (PDF, Word...)", type=["pdf", "docx", "doc"])
-
-        submit = st.form_submit_button("✅ Enregistrer le rapport")
-
-    if submit and nom_sel and uploaded_file:
-        temp_path = "temp_upload.pdf"
-        with open(temp_path, "wb") as f:
-            f.write(uploaded_file.getbuffer())
-
-        assert os.path.exists(temp_path), "Le fichier PDF n’a pas été généré"
-
-        try:
-            folder_id = st.secrets["GOOGLE_DRIVE_FOLDER_ID"]
-            url_partage = upload_to_drive(temp_path, uploaded_file.name, parent_folder_id=folder_id)
-            os.remove(temp_path)
-        except Exception as e:
-            st.error(f"Erreur lors de l'upload sur Google Drive : {e}")
-            st.stop()
-
-        rapports = json.loads(st.session_state["far_arbitres"][arbitres_dict[nom_sel]].get("Rapports", "[]"))
-        rapports.append({
-            "nom_original": uploaded_file.name,
-            "url": url_partage
-        })
-        st.session_state["far_arbitres"][arbitres_dict[nom_sel]]["Rapports"] = json.dumps(rapports, ensure_ascii=False)
-
-        save_arbitres(st.session_state["far_arbitres"])
-        st.success("✅ Rapport envoyé sur Google Drive.")
-        st.rerun()
-
-
-
-
 
 elif action == "👤 Fiche arbitre":
     st.subheader("👤 Rechercher un arbitre")
