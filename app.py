@@ -13,8 +13,15 @@ st.write("Clés dans st.secrets :", list(st.secrets.keys()))
 from supabase import create_client
 from google_drive_utils import list_rapports_for_arbitre  
 from google_drive_utils import delete_rapport_from_supabase
+import unicodedata
 from urllib.parse import urlparse, unquote
 
+import unicodedata
+
+def nettoyer_nom_supabase(texte):
+    # Supprime les accents, trémas, etc.
+    texte = unicodedata.normalize('NFKD', texte).encode('ASCII', 'ignore').decode('utf-8')
+    return texte.replace(" ", "_")
 
 def upload_rapport_to_supabase(uploaded_file, arbitre_id):
     """
@@ -26,7 +33,10 @@ def upload_rapport_to_supabase(uploaded_file, arbitre_id):
     supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
     bucket = "rapports"
 
-    filepath = f"{arbitre_id}/{uploaded_file.name}"
+    safe_arbitre_id = nettoyer_nom_supabase(arbitre_id)
+    safe_filename = nettoyer_nom_supabase(uploaded_file.name)
+    filepath = f"{safe_arbitre_id}/{safe_filename}"
+
 
     # Supprimer l’ancien fichier s’il existe
     delete_res = supabase.storage.from_(bucket).remove([filepath])
