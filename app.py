@@ -192,8 +192,20 @@ def sauvegarder_base_dans_supabase():
     buffer = BytesIO()
     df.to_excel(buffer, index=False)
     buffer.seek(0)
-    supabase.storage.from_(bucket).upload(file=buffer.read(), path=fichier_path, file_options={"content-type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}, upsert=True)
-    st.success("✅ Base mise à jour avec succès !")
+
+    # Supprimer le fichier s’il existe déjà
+    try:
+        supabase.storage.from_(bucket).remove([fichier_path])
+    except Exception as e:
+        pass  # ignore s’il n’existe pas encore
+
+    # Upload sans "upsert"
+    try:
+        supabase.storage.from_(bucket).upload(fichier_path, buffer.read())
+        st.success("✅ Base mise à jour avec succès !")
+    except Exception as e:
+        st.error(f"Erreur lors de la mise à jour : {e}")
+
 
 st.button("💾 Mettre à jour la base", on_click=sauvegarder_base_dans_supabase)
 
