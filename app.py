@@ -24,13 +24,21 @@ bucket = "rapports"
 fichier_path = "base/far_arbitres.xlsx"
 
 @st.cache_data(ttl=600)
-def charger_fichier_depuis_supabase():
+def charger_base_depuis_supabase():
+    SUPABASE_URL = st.secrets["SUPABASE_URL"]
+    SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
+    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+    bucket = "rapports"
+    fichier_path = "base/far_arbitres.xlsx"
+
     try:
-        res = supabase.storage.from_(bucket).download(fichier_path)
-        return pd.read_excel(BytesIO(res))
+        data = supabase.storage.from_(bucket).download(fichier_path)
+        df = pd.read_excel(BytesIO(data))
+        st.session_state["far_arbitres"] = df.to_dict(orient="records")
+        st.success("✅ Base chargée automatiquement depuis Supabase.")
     except Exception as e:
-        st.error(f"Erreur lors du chargement de la base : {e}")
-        return pd.DataFrame()
+        st.error(f"❌ Erreur lors du chargement de la base : {e}")
 
 # Chargement automatique
 if "far_arbitres" not in st.session_state:
@@ -188,23 +196,43 @@ with col_title:
     st.markdown("Bienvenue sur l'application officielle de la **Filière Arbitrage Régionale du District 92**.")
 
 def sauvegarder_base_dans_supabase():
+    import pandas as pd
+    from io import BytesIO
+    from supabase import create_client
+
+    SUPABASE_URL = st.secrets["SUPABASE_URL"]
+    SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
+    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+    bucket = "rapports"
+    dossier = "base"
+    nom_fichier = "far_arbitres.xlsx"
+    fichier_path = f"{dossier}/{nom_fichier}"
+
+    # Création du fichier Excel
     df = pd.DataFrame(st.session_state["far_arbitres"])
     buffer = BytesIO()
     df.to_excel(buffer, index=False)
     buffer.seek(0)
 
-    # Supprimer le fichier s’il existe déjà
-    try:
-        supabase.storage.from_(bucket).remove([fichier_path])
-    except Exception as e:
-        pass  # ignore s’il n’existe pas encore
+    # Vérifie si le fichier existe
+    fichiers = supabase.storage.from_(bucket).list(path=dossier)
+    noms_fichiers = [f["name"] for f in fichiers if isinstance(f, dict)]
+    if nom_fichier in noms_fichiers:
+        try:
+            supabase.storage.from_(bucket).remove([fichier_path])
+        except Exception as e:
+            st.error(f"Erreur lors de la suppression du fichier existant : {e}")
+            return
 
-    # Upload sans "upsert"
+    # Upload du nouveau fichier
     try:
         supabase.storage.from_(bucket).upload(fichier_path, buffer.read())
-        st.success("✅ Base mise à jour avec succès !")
+        st.success("✅ Base mise à jour avec succès")
     except Exception as e:
-        st.error(f"Erreur lors de la mise à jour : {e}")
+        st.error(f"❌ Erreur lors de la mise à jour : {e}")
+
+
 
 
 st.button("💾 Mettre à jour la base", on_click=sauvegarder_base_dans_supabase)
