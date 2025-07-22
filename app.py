@@ -15,7 +15,6 @@ from google_drive_utils import delete_rapport_from_supabase
 import unicodedata
 from urllib.parse import urlparse, unquote
 import unicodedata
-from google_drive_utils import charger_base_excel_depuis_supabase
 
 @st.cache_data
 def charger_base_excel_depuis_supabase():
