@@ -1268,8 +1268,6 @@ elif action == "👤 Fiche arbitre":
             except Exception as e:
                 st.error(f"Erreur : {e}")
 
-        if a.get("Rapport observation"):
-            st.markdown(f"📁 Rapport déjà enregistré : [Voir le rapport]({a['Rapport observation']})")
 
         st.divider()
         col1, col2 = st.columns(2)
