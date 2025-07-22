@@ -40,9 +40,6 @@ def charger_base_depuis_supabase():
     except Exception as e:
         st.error(f"❌ Erreur lors du chargement de la base : {e}")
 
-# Chargement automatique
-if "far_arbitres" not in st.session_state:
-    st.session_state["far_arbitres"] = charger_fichier_depuis_supabase().to_dict(orient="records")
 
 def charger_derniere_version_excel():
     from supabase import create_client
