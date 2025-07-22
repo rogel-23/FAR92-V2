@@ -648,11 +648,11 @@ elif action == "📉 Récapitulatif des manquements":
     else:
         df_mqs = pd.DataFrame(tous_manquements)
 
-        types_dispo = ["Tous"] + sorted(df_mqs["Type"].unique())
-        filtre_type = st.selectbox("Filtrer par type de manquement", types_dispo)
+        noms_dispo = ["Tous"] + sorted(df_mqs["Nom complet"].unique())
+        filtre_nom = st.selectbox("Filtrer par arbitre", noms_dispo)
 
-        if filtre_type != "Tous":
-            df_mqs = df_mqs[df_mqs["Type"] == filtre_type]
+        if filtre_nom != "Tous":
+            df_mqs = df_mqs[df_mqs["Nom complet"] == filtre_nom]
 
         df_mqs = df_mqs.sort_values(by="Date", ascending=False)
 
