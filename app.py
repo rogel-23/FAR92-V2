@@ -15,6 +15,9 @@ from google_drive_utils import delete_rapport_from_supabase
 import unicodedata
 from urllib.parse import urlparse, unquote
 import unicodedata
+from docx import Document
+from docxcompose.composer import Composer
+from tempfile import NamedTemporaryFile
 
 SUPABASE_URL = st.secrets["SUPABASE_URL"]
 SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
@@ -1286,16 +1289,24 @@ elif action == "👤 Fiche arbitre":
 
         with col2:
             if st.button("📁 Générer fiches Word (tous les arbitres)"):
-                doc_all = Document()
+                # Document de base pour composer
+                base_doc = Document()
+                composer = Composer(base_doc)
+
                 for arbitre in st.session_state["far_arbitres"]:
                     fiche = create_doc_for_arbitre(arbitre, st.session_state["far_arbitres"])
-                    for p in fiche.paragraphs:
-                        doc_all.add_paragraph(p.text)
-                    doc_all.add_page_break()
+
+                    # On sauvegarde la fiche dans un fichier temporaire pour la recharger avec Composer
+                    with NamedTemporaryFile(delete=False, suffix=".docx") as tmp:
+                        fiche.save(tmp.name)
+                        tmp.flush()
+                        tmp_doc = Document(tmp.name)
+                        composer.append(tmp_doc)
 
                 buffer = BytesIO()
-                doc_all.save(buffer)
+                composer.save(buffer)
                 buffer.seek(0)
+
                 st.download_button(
                     "Télécharger fiches (tous)",
                     data=buffer,
