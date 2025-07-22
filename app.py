@@ -215,22 +215,17 @@ def sauvegarder_base_dans_supabase():
     df.to_excel(buffer, index=False)
     buffer.seek(0)
 
-    # Vérifie si le fichier existe
-    fichiers = supabase.storage.from_(bucket).list(path=dossier)
-    noms_fichiers = [f["name"] for f in fichiers if isinstance(f, dict)]
-    if nom_fichier in noms_fichiers:
-        try:
-            supabase.storage.from_(bucket).remove([fichier_path])
-        except Exception as e:
-            st.error(f"Erreur lors de la suppression du fichier existant : {e}")
-            return
-
-    # Upload du nouveau fichier
+    # Upload avec upsert explicite
     try:
-        supabase.storage.from_(bucket).upload(fichier_path, buffer.read())
-        st.success("✅ Base mise à jour avec succès")
+        supabase.storage.from_(bucket).upload(
+            path=fichier_path,
+            file=buffer.read(),
+            file_options={"content-type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "x-upsert": "true"}
+        )
+        st.success("✅ Base mise à jour avec succès dans Supabase.")
     except Exception as e:
         st.error(f"❌ Erreur lors de la mise à jour : {e}")
+
 
 
 
