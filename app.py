@@ -639,8 +639,10 @@ elif action == "📉 Récapitulatif des manquements":
                 "Nom complet": f"{a['Prénom']} {a['Nom']}",
                 "Type": m.get("Type", "Inconnu"),
                 "Détail": m.get("Détail", ""),
-                "Date": m.get("Date", "")
+                "Date": m.get("Date", ""),
+                "Commentaire": m.get("Commentaire", "")
             }
+
             tous_manquements.append(ligne)
 
     if not tous_manquements:
@@ -661,6 +663,9 @@ elif action == "📉 Récapitulatif des manquements":
                 st.markdown(f"📅 **Date :** {row['Date']}")
                 if row["Détail"]:
                     st.markdown(f"📝 **Détail :** {row['Détail']}")
+
+                if row["Commentaire"]:
+                    st.markdown(f"💬 **Commentaire :** {row['Commentaire']}")
 
                 if st.button("🗑️ Supprimer ce manquement", key=f"del_manquement_{idx}"):
                     i = row["Index"]
