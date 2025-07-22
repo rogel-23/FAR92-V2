@@ -289,12 +289,12 @@ def sauvegarder_base_dans_supabase():
 
 
 
+with col_save:
+    st.write("")  # pour ajuster verticalement
+    if st.button("💾 Mettre à jour la base"):
+        df = pd.DataFrame(st.session_state["far_arbitres"])
+        sauvegarder_nouvelle_version_excel(df)
 
-
-# Bouton pour sauvegarder une nouvelle version
-if st.button("💾 Mettre à jour la base"):
-    df = pd.DataFrame(st.session_state["far_arbitres"])
-    sauvegarder_nouvelle_version_excel(df)
 
 
 
