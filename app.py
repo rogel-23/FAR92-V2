@@ -44,6 +44,37 @@ def charger_base_depuis_supabase():
 if "far_arbitres" not in st.session_state:
     st.session_state["far_arbitres"] = charger_fichier_depuis_supabase().to_dict(orient="records")
 
+def charger_derniere_version_excel():
+    from supabase import create_client
+    import pandas as pd
+    import io
+
+    SUPABASE_URL = st.secrets["SUPABASE_URL"]
+    SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
+    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+    bucket = "rapports"
+    dossier = "base"
+
+    fichiers = supabase.storage.from_(bucket).list(path=dossier)
+
+    fichiers_excel = [f for f in fichiers if f['name'].endswith('.xlsx')]
+    if not fichiers_excel:
+        st.error("Aucun fichier Excel trouvé dans Supabase.")
+        return None
+
+    # Tri par date de création décroissante
+    fichiers_excel.sort(key=lambda f: f['created_at'], reverse=True)
+    nom_fichier = fichiers_excel[0]['name']
+    chemin_fichier = f"{dossier}/{nom_fichier}"
+
+    contenu = supabase.storage.from_(bucket).download(chemin_fichier)
+    df = pd.read_excel(io.BytesIO(contenu))
+    st.success(f"📥 Dernier fichier chargé : `{nom_fichier}`")
+    return df
+
+
+
 
 st.set_page_config(
     page_title="FAR 92",  # ✅ Titre personnalisé de l'onglet
@@ -65,9 +96,11 @@ if not st.session_state["auth_ok"]:
         st.error("Mot de passe incorrect")
     st.stop()
 
+# Chargement automatique à l'ouverture
 if "far_arbitres" not in st.session_state:
-    df = charger_base_excel_depuis_supabase()
-    st.session_state["far_arbitres"] = df.to_dict(orient="records")
+    df = charger_derniere_version_excel()
+    if df is not None:
+        st.session_state["far_arbitres"] = df.to_dict(orient="records")
 
 
 
@@ -195,6 +228,34 @@ with col_title:
     st.title("⚽ FAR 92 - Application de gestion")
     st.markdown("Bienvenue sur l'application officielle de la **Filière Arbitrage Régionale du District 92**.")
 
+def sauvegarder_nouvelle_version_excel(df):
+
+    SUPABASE_URL = st.secrets["SUPABASE_URL"]
+    SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
+    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+    bucket = "rapports"
+    dossier = "base"
+
+    fichiers = supabase.storage.from_(bucket).list(path=dossier)
+    versions = [int(f["name"].split("_v")[-1].split(".")[0]) for f in fichiers if "_v" in f["name"]]
+    nouvelle_version = max(versions) + 1 if versions else 1
+
+    nom_fichier = f"far_arbitres_v{nouvelle_version}.xlsx"
+    chemin = f"{dossier}/{nom_fichier}"
+
+    buffer = BytesIO()
+    df.to_excel(buffer, index=False)
+    buffer.seek(0)
+
+    try:
+        supabase.storage.from_(bucket).upload(path=chemin, file=buffer.read())
+        st.success(f"✅ Base sauvegardée sous : `{nom_fichier}`")
+    except Exception as e:
+        st.error(f"❌ Erreur lors de la sauvegarde : {e}")
+
+
+
 def sauvegarder_base_dans_supabase():
     import pandas as pd
     from io import BytesIO
@@ -230,7 +291,10 @@ def sauvegarder_base_dans_supabase():
 
 
 
-st.button("💾 Mettre à jour la base", on_click=sauvegarder_base_dans_supabase)
+# Bouton pour sauvegarder une nouvelle version
+if st.button("💾 Mettre à jour la base"):
+    df = pd.DataFrame(st.session_state["far_arbitres"])
+    sauvegarder_nouvelle_version_excel(df)
 
 
 
