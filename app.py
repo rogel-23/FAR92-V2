@@ -250,7 +250,7 @@ def sauvegarder_nouvelle_version_excel(df):
 
     try:
         supabase.storage.from_(bucket).upload(path=chemin, file=buffer.read())
-        st.success(f"✅ Base sauvegardée sous : `{nom_fichier}`")
+        st.success(f"✅ Base sauvegardée")
     except Exception as e:
         st.error(f"❌ Erreur lors de la sauvegarde : {e}")
 
