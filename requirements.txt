@@ -7,3 +7,4 @@ google-api-python-client
 google-auth
 google-auth-oauthlib
 supabase>=2.0.3
+docxcompose
