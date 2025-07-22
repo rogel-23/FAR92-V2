@@ -16,20 +16,25 @@ import unicodedata
 from urllib.parse import urlparse, unquote
 import unicodedata
 
-@st.cache_data
-def charger_base_excel_depuis_supabase():
-    SUPABASE_URL = st.secrets["SUPABASE_URL"]
-    SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
-    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+SUPABASE_URL = st.secrets["SUPABASE_URL"]
+SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-    bucket = "rapports"
-    path = "base/far_arbitres.xlsx"
+bucket = "rapports"
+fichier_path = "base/far_arbitres.xlsx"
+
+@st.cache_data(ttl=600)
+def charger_fichier_depuis_supabase():
     try:
-        res = supabase.storage.from_(bucket).download(path)
+        res = supabase.storage.from_(bucket).download(fichier_path)
         return pd.read_excel(BytesIO(res))
     except Exception as e:
-        st.error(f"Erreur lors du chargement de la base depuis Supabase : {e}")
-        return pd.DataFrame()  # base vide si erreur
+        st.error(f"Erreur lors du chargement de la base : {e}")
+        return pd.DataFrame()
+
+# Chargement automatique
+if "far_arbitres" not in st.session_state:
+    st.session_state["far_arbitres"] = charger_fichier_depuis_supabase().to_dict(orient="records")
 
 
 st.set_page_config(
@@ -182,48 +187,21 @@ with col_title:
     st.title("⚽ FAR 92 - Application de gestion")
     st.markdown("Bienvenue sur l'application officielle de la **Filière Arbitrage Régionale du District 92**.")
 
-def envoyer_base_excel_vers_supabase():
-    SUPABASE_URL = st.secrets["SUPABASE_URL"]
-    SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
-    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
-
+def sauvegarder_base_dans_supabase():
     df = pd.DataFrame(st.session_state["far_arbitres"])
     buffer = BytesIO()
     df.to_excel(buffer, index=False)
     buffer.seek(0)
+    supabase.storage.from_(bucket).upload(file=buffer.read(), path=fichier_path, file_options={"content-type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}, upsert=True)
+    st.success("✅ Base mise à jour avec succès !")
 
-    supabase.storage.from_("rapports").upload(
-        path="base/far_arbitres.xlsx",
-        file=buffer,
-        file_options={"content-type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"},
-        upsert=True
-    )
-    st.success("✅ Base mise à jour")
-
-if st.button("🔄 Mettre à jour la base"):
-    envoyer_base_excel_vers_supabase()
+st.button("💾 Mettre à jour la base", on_click=sauvegarder_base_dans_supabase)
 
 
 
 # === CHARGEMENT INITIAL D'UN FICHIER EXCEL ===
 if "fichier_source" not in st.session_state:
     st.session_state["fichier_source"] = None
-
-if st.session_state["fichier_source"] is None:
-    st.subheader("📂 Charger un fichier Excel FAR")
-    uploaded_file = st.file_uploader("Sélectionnez un fichier Excel", type=["xlsx"])
-
-    if uploaded_file is not None:
-        df = pd.read_excel(uploaded_file)
-        for col in ["Rassemblements"]:
-            if col not in df.columns:
-                df[col] = ""
-        st.session_state["far_arbitres"] = df.to_dict(orient="records")
-        st.session_state["fichier_source"] = uploaded_file.name
-        st.success("Fichier chargé avec succès.")
-        st.rerun()
-    else:
-        st.stop()
 
 
 # === SESSION STATE ===
