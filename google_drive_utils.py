@@ -5,6 +5,8 @@ from google.oauth2 import service_account
 from googleapiclient.http import MediaFileUpload
 from supabase import create_client
 import unicodedata
+import requests
+
 
 
 def nettoyer_nom_supabase(texte):

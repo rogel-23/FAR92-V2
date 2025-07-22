@@ -14,8 +14,23 @@ from google_drive_utils import list_rapports_for_arbitre
 from google_drive_utils import delete_rapport_from_supabase
 import unicodedata
 from urllib.parse import urlparse, unquote
-
 import unicodedata
+from google_drive_utils import charger_base_excel_depuis_supabase
+
+@st.cache_data
+def charger_base_excel_depuis_supabase():
+    SUPABASE_URL = st.secrets["SUPABASE_URL"]
+    SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
+    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+    bucket = "rapports"
+    path = "base/far_arbitres.xlsx"
+    try:
+        res = supabase.storage.from_(bucket).download(path)
+        return pd.read_excel(BytesIO(res))
+    except Exception as e:
+        st.error(f"Erreur lors du chargement de la base depuis Supabase : {e}")
+        return pd.DataFrame()  # base vide si erreur
 
 
 st.set_page_config(
@@ -37,6 +52,11 @@ if not st.session_state["auth_ok"]:
     elif mdp != "":
         st.error("Mot de passe incorrect")
     st.stop()
+
+if "far_arbitres" not in st.session_state:
+    df = charger_base_excel_depuis_supabase()
+    st.session_state["far_arbitres"] = df.to_dict(orient="records")
+
 
 
 def safe_load_json(val):
@@ -163,22 +183,27 @@ with col_title:
     st.title("⚽ FAR 92 - Application de gestion")
     st.markdown("Bienvenue sur l'application officielle de la **Filière Arbitrage Régionale du District 92**.")
 
-with col_save:
-    st.write("")  # décalage vertical
+def envoyer_base_excel_vers_supabase():
+    SUPABASE_URL = st.secrets["SUPABASE_URL"]
+    SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
+    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+
     df = pd.DataFrame(st.session_state["far_arbitres"])
-
-    # Test : exécution locale ou non
-    is_local = os.path.exists(".git") or os.getenv("STREAMLIT_ENV") != "cloud"
-
     buffer = BytesIO()
-    df.to_excel(buffer, index=False, engine="openpyxl")
+    df.to_excel(buffer, index=False)
     buffer.seek(0)
-    st.download_button(
-        "💾 Sauvegarde",
-        data=buffer,
-        file_name="far_arbitres.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
+    supabase.storage.from_("rapports").upload(
+        path="base/far_arbitres.xlsx",
+        file=buffer,
+        file_options={"content-type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"},
+        upsert=True
     )
+    st.success("✅ Base mise à jour")
+
+if st.button("🔄 Mettre à jour la base"):
+    envoyer_base_excel_vers_supabase()
+
 
 
 # === CHARGEMENT INITIAL D'UN FICHIER EXCEL ===
